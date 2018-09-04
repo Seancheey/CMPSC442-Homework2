@@ -26,7 +26,7 @@ solutions = my_main.n_queens_solutions(4)
 assert next(solutions) == [1, 3, 0, 2]
 assert next(solutions) == [2, 0, 3, 1]
 assert list(my_main.n_queens_solutions(6)) == [[1, 3, 5, 0, 2, 4], [2, 5, 1, 4, 0, 3], [3, 0, 4, 1, 5, 2], [4, 2, 0, 5, 3, 1]]
-#assert len(list(my_main.n_queens_solutions(8))) == 92
+assert len(list(my_main.n_queens_solutions(8))) == 92
 
 
 # q2_1

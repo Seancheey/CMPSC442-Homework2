@@ -36,38 +36,42 @@ def n_queens_valid(board):
                 return False
     return True
 
-def possible_boards(n):
-    board = [0] * n
-    while board[0]!=n:
-        yield board[:]
-        board[-1] += 1
-        for i in range(1,n):
-            if board[-i] == n:
-                board[-i],board[-i-1] = 0,board[-i-1]+1
-            else:
-                break
+def n_queens_helper(n,board):
+    if len(board) == n:
+        yield board
+    else:
+        for y in [yi for yi in range(n) if n_queens_valid(board+[yi])]:
+            for ele in n_queens_helper(n,board+[y]):
+                yield ele
 
 def n_queens_solutions(n):
-    for board in possible_boards(n):
-        if n_queens_valid(board):
-            yield board
-
+    for ele in n_queens_helper(n,[]):
+        yield ele
 
 ############################################################
 # Section 2: Lights Out
 ############################################################
 
 class LightsOutPuzzle(object):
-    __slots__ = "board"
+    __slots__ = "board","row_num","col_num"
+
     def __init__(self, board):
         self.board = board
-
+        self.row_num = len(self.board)
+        self.col_num = len(self.board[0])
 
     def get_board(self):
         return self.board
 
     def perform_move(self, row, col):
-        pass
+        if row > 0:
+            self.board[row-1][col] = not self.board[row-1][col]
+        if row < self.row_num-1:
+            self.board[row+1][col] = not self.board[row+1][col]
+        if col > 0:
+            self.board[row][col-1] = not self.board[row][col-1]
+        if col < self.col_num-1:
+            self.board[row][col+1] = not self.board[row][col+1]
 
     def scramble(self):
         pass
@@ -85,7 +89,7 @@ class LightsOutPuzzle(object):
         pass
 
 def create_puzzle(rows, cols):
-    pass
+    return LightsOutPuzzle([[False]*cols for _ in range(rows)])
 
 ############################################################
 # Section 3: Linear Disk Movement
