@@ -8,10 +8,18 @@ student_name = "Qiyi Shan"
 # Imports
 ############################################################
 
+from random import random
+
 # Include your imports here, if any are used.
 
 def utest():
-    print list(n_queens_solutions(4))
+    p = create_puzzle(2, 2)
+    p = create_puzzle(2, 3)
+    for row in range(2):
+        for col in range(3):
+            p.perform_move(row, col)
+    print p.find_solution()
+    
 ############################################################
 # Section 1: N-Queens
 ############################################################
@@ -64,6 +72,7 @@ class LightsOutPuzzle(object):
         return self.board
 
     def perform_move(self, row, col):
+        self.board[row][col] = not self.board[row][col]
         if row > 0:
             self.board[row-1][col] = not self.board[row-1][col]
         if row < self.row_num-1:
@@ -72,21 +81,44 @@ class LightsOutPuzzle(object):
             self.board[row][col-1] = not self.board[row][col-1]
         if col < self.col_num-1:
             self.board[row][col+1] = not self.board[row][col+1]
+        return self
 
     def scramble(self):
-        pass
+        for row in range(self.row_num):
+            for col in range(self.col_num):
+                 if random() < 0.5:
+                     self.perform_move(row,col)
 
     def is_solved(self):
-        pass
+        for row in range(self.row_num):
+            for col in range(self.col_num):
+                if self.board[row][col] == True:
+                    return False
+        return True
 
     def copy(self):
-        pass
+        return LightsOutPuzzle([row[:] for row in self.board])
 
     def successors(self):
-        pass
+        for y in range(self.row_num):
+            for x in range(self.col_num):
+                yield ((y,x),self.copy().perform_move(y,x))
 
     def find_solution(self):
-        pass
+        if self.is_solved():
+            return []
+        puzzle_queue = [s[1] for s in self.successors()]
+        moves_queue = [[s[0]] for s in self.successors()]
+        i = 0
+        while i < len(puzzle_queue):
+            moves,puzzle = moves_queue[i],puzzle_queue[i]
+            if puzzle.is_solved():
+                return moves
+            for successor in puzzle_queue[i].successors():
+                if successor[1] not in puzzle_queue:
+                    puzzle_queue.append(successor[1])
+                    moves_queue.append(moves+[successor[0]])
+            i+=1
 
 def create_puzzle(rows, cols):
     return LightsOutPuzzle([[False]*cols for _ in range(rows)])

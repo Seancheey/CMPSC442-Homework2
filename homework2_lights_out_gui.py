@@ -1,7 +1,7 @@
 import sys
 import Tkinter
 
-import homework2
+import qxs20 as homework2
 
 class Light(Tkinter.Canvas):
 
