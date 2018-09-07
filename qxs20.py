@@ -9,12 +9,13 @@ student_name = "Qiyi Shan"
 ############################################################
 
 from random import random
+from collections import deque
+import copy
 
 # Include your imports here, if any are used.
 
 def utest():
-    p = create_puzzle(2, 2)
-    p = create_puzzle(2, 3)
+    p = create_puzzle(5, 5)
     for row in range(2):
         for col in range(3):
             p.perform_move(row, col)
@@ -99,24 +100,22 @@ class LightsOutPuzzle(object):
     def copy(self):
         return LightsOutPuzzle([row[:] for row in self.board])
 
-    def successors(self):
-        for y in range(self.row_num):
+    def successors(self,last_move=(0,-1)):
+        for y in range(last_move[0],self.row_num):
             for x in range(self.col_num):
-                yield ((y,x),self.copy().perform_move(y,x))
+                if (y==last_move[0] and x > last_move[1]) or y>last_move[0]:
+                    yield ((y,x),self.copy().perform_move(y,x))
 
     def find_solution(self):
         if self.is_solved():
             return []
-        solve_queue = [([s[0]],s[1]) for s in self.successors()]
-        i = 0
-        while i < len(solve_queue):
-            moves,puzzle = solve_queue[i]
+        solve_queue = deque([([s[0]],s[1]) for s in self.successors()])
+        while len(solve_queue) > 0:
+            moves,puzzle = solve_queue.popleft()
             if puzzle.is_solved():
                 return moves
-            last_move = moves[-1][1] + moves[-1][0]*self.col_num
-            for successor in list(puzzle.successors())[last_move+1:]:
-                    solve_queue.append((moves+[successor[0]],successor[1]))
-            i+=1
+            for successor in puzzle.successors(last_move=moves[-1]):
+                solve_queue.append((moves+[successor[0]],successor[1]))
 
 def create_puzzle(rows, cols):
     return LightsOutPuzzle([[False]*cols for _ in range(rows)])
