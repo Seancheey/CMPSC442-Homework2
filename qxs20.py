@@ -10,13 +10,12 @@ student_name = "Qiyi Shan"
 
 from random import random
 from collections import deque
-import copy
 
 # Include your imports here, if any are used.
 
 def utest():
-    p = create_puzzle(5, 5)
-    for row in range(2):
+    p = create_puzzle(4, 5)
+    for row in range(3):
         for col in range(3):
             p.perform_move(row, col)
     print p.find_solution()
