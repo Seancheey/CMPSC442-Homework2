@@ -10,15 +10,15 @@ student_name = "Qiyi Shan"
 
 from random import random
 from collections import deque
+import cProfile
 
 # Include your imports here, if any are used.
 
-def utest():
-    p = create_puzzle(4, 5)
-    for row in range(3):
-        for col in range(3):
-            p.perform_move(row, col)
-    print p.find_solution()
+
+
+def perform_test():
+    print cProfile.run("utest()")
+
 
 ############################################################
 # Section 1: N-Queens
@@ -123,11 +123,92 @@ def create_puzzle(rows, cols):
 # Section 3: Linear Disk Movement
 ############################################################
 
+class MoveSeries:
+    __slots__ = "move","last_move"
+
+    def __init__(self,move,last_move=None):
+        self.move = move
+        self.last_move = last_move
+
+class DiskPuzzle(object):
+    __slots__ = "distinct","board", "board_len", "disk_num"
+    empty = -1
+    NA = 10086
+
+    def __init__(self, board, disk_num, distinct):
+        self.distinct = distinct
+        self.disk_num = disk_num
+        self.board = board
+        self.board_len = len(self.board)
+
+    def copy(self):
+        return DiskPuzzle(self.board[:],self.disk_num,self.distinct)
+
+    def solved(self):
+        for i in range(1,self.disk_num+1):
+            if self.distinct:
+                if self.board[-i] != i-1:
+                    return False
+            else:
+                if self.board[-i] is DiskPuzzle.empty:
+                    return False
+        return True
+
+    def move(self,start,end):
+        self.board[start],self.board[end] = self.board[end],self.board[start]
+        return self
+
+    def successors(self,last_move=None):
+        # disk go forward 1
+        for i,disk in enumerate(self.board):
+            if disk == DiskPuzzle.empty:
+                continue
+            if last_move:
+                
+            next = self.board[i+1] if i < len(self.board)-1 else DiskPuzzle.NA;
+            next2 = self.board[i+2] if i < len(self.board)-2 else DiskPuzzle.NA;
+            prev = self.board[i-1] if i > 1 else DiskPuzzle.NA;
+            prev2 = self.board[i-2] if i > 2 else DiskPuzzle.NA;
+            if next == DiskPuzzle.empty:
+                yield (MoveSeries((i,i+1),last_move),self.copy().move(i,i+1))
+            elif next2 == DiskPuzzle.empty:
+                yield (MoveSeries((i,i+2),last_move),self.copy().move(i,i+2))
+            if prev == DiskPuzzle.empty:
+                yield (MoveSeries((i,i-1),last_move),self.copy().move(i,i-1))
+            elif prev2 == DiskPuzzle.empty:
+                yield (MoveSeries((i,i-2),last_move),self.copy().move(i,i-2))
+
+    def solve(self):
+        if self.solved():
+            return []
+        queue = deque(list(self.successors()))
+        while len(queue) > 0:
+            moves,puzzle = queue.popleft()
+            if puzzle.solved():
+                out = [moves.move]
+                while moves.last_move is not None:
+                    moves = moves.last_move
+                    out.insert(0,moves.move)
+                return out
+            else:
+                for successor in puzzle.successors(last_move=moves):
+                    queue.append(successor)
+
+def create_disk_puzzle(length, n, distinct):
+    return DiskPuzzle([i if i < n else DiskPuzzle.empty for i in range(length)],n,distinct)
+
 def solve_identical_disks(length, n):
-    pass
+    puzzle = create_disk_puzzle(length,n,False)
+    print puzzle.board
+    return puzzle.solve()
 
 def solve_distinct_disks(length, n):
-    pass
+    puzzle = create_disk_puzzle(length,n,True)
+    print puzzle.board
+    return puzzle.solve()
+
+def utest():
+    print solve_identical_disks(8,4)
 
 ############################################################
 # Section 4: Feedback
@@ -152,4 +233,4 @@ Do not include these instructions in your response.
 """
 
 if __name__ == "__main__":
-    utest()
+    perform_test()
