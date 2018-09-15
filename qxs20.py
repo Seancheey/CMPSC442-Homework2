@@ -14,11 +14,8 @@ import cProfile
 
 # Include your imports here, if any are used.
 
-
-
 def perform_test():
     print cProfile.run("utest()")
-
 
 ############################################################
 # Section 1: N-Queens
@@ -158,25 +155,26 @@ class DiskPuzzle(object):
         self.board[start],self.board[end] = self.board[end],self.board[start]
         return self
 
-    def successors(self,last_move=None):
+    def successors(self,last_moves=None,iterated_board=None):
+        if iterated_board is None:
+            iterated_board = []
         # disk go forward 1
         for i,disk in enumerate(self.board):
             if disk == DiskPuzzle.empty:
                 continue
-            if last_move:
-                
             next = self.board[i+1] if i < len(self.board)-1 else DiskPuzzle.NA;
             next2 = self.board[i+2] if i < len(self.board)-2 else DiskPuzzle.NA;
             prev = self.board[i-1] if i > 1 else DiskPuzzle.NA;
             prev2 = self.board[i-2] if i > 2 else DiskPuzzle.NA;
+            last_pos,last_destination = last_moves.move if last_moves else (-1,-1)
             if next == DiskPuzzle.empty:
-                yield (MoveSeries((i,i+1),last_move),self.copy().move(i,i+1))
+                yield (MoveSeries((i,i+1),last_moves),self.copy().move(i,i+1))
             elif next2 == DiskPuzzle.empty:
-                yield (MoveSeries((i,i+2),last_move),self.copy().move(i,i+2))
+                yield (MoveSeries((i,i+2),last_moves),self.copy().move(i,i+2))
             if prev == DiskPuzzle.empty:
-                yield (MoveSeries((i,i-1),last_move),self.copy().move(i,i-1))
+                yield (MoveSeries((i,i-1),last_moves),self.copy().move(i,i-1))
             elif prev2 == DiskPuzzle.empty:
-                yield (MoveSeries((i,i-2),last_move),self.copy().move(i,i-2))
+                yield (MoveSeries((i,i-2),last_moves),self.copy().move(i,i-2))
 
     def solve(self):
         if self.solved():
@@ -191,7 +189,7 @@ class DiskPuzzle(object):
                     out.insert(0,moves.move)
                 return out
             else:
-                for successor in puzzle.successors(last_move=moves):
+                for successor in puzzle.successors(last_moves=moves):
                     queue.append(successor)
 
 def create_disk_puzzle(length, n, distinct):
@@ -208,28 +206,26 @@ def solve_distinct_disks(length, n):
     return puzzle.solve()
 
 def utest():
-    print solve_identical_disks(8,4)
+    print solve_distinct_disks(4,2)
+    print solve_distinct_disks(5,2)
+    print solve_distinct_disks(5,3)
 
 ############################################################
 # Section 4: Feedback
 ############################################################
 
 feedback_question_1 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
+6 hours
 """
 
 feedback_question_2 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
+I spent most of the time trying to decrease running time for LightsOutPuzzle.
+eliminating repeat states are challenging.
+There are many possible solutions to eliminate them but there are only a few efficent ones.
 """
 
 feedback_question_3 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
+All of them. Light
 """
 
 if __name__ == "__main__":
