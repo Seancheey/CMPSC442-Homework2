@@ -10,12 +10,8 @@ student_name = "Qiyi Shan"
 
 from random import random
 from collections import deque
-import cProfile
 
 # Include your imports here, if any are used.
-
-def perform_test():
-    print cProfile.run("utest()")
 
 ############################################################
 # Section 1: N-Queens
@@ -158,28 +154,24 @@ class DiskPuzzle(object):
     def successors(self,last_moves=None,iterated_board=None):
         if iterated_board is None:
             iterated_board = []
-        # disk go forward 1
         for i,disk in enumerate(self.board):
             if disk == DiskPuzzle.empty:
                 continue
-            next = self.board[i+1] if i < len(self.board)-1 else DiskPuzzle.NA;
-            next2 = self.board[i+2] if i < len(self.board)-2 else DiskPuzzle.NA;
-            prev = self.board[i-1] if i > 1 else DiskPuzzle.NA;
-            prev2 = self.board[i-2] if i > 2 else DiskPuzzle.NA;
-            last_pos,last_destination = last_moves.move if last_moves else (-1,-1)
-            if next == DiskPuzzle.empty:
-                yield (MoveSeries((i,i+1),last_moves),self.copy().move(i,i+1))
-            elif next2 == DiskPuzzle.empty:
-                yield (MoveSeries((i,i+2),last_moves),self.copy().move(i,i+2))
-            if prev == DiskPuzzle.empty:
-                yield (MoveSeries((i,i-1),last_moves),self.copy().move(i,i-1))
-            elif prev2 == DiskPuzzle.empty:
-                yield (MoveSeries((i,i-2),last_moves),self.copy().move(i,i-2))
+            diffs = [2,1,-1,-2]
+            for diff in diffs:
+                if self.get(i+diff) == DiskPuzzle.empty and ((i+diff-1) == i or (self.get(i+diff-1) != DiskPuzzle.empty)):
+                    new_puzzle = self.copy().move(i,i+diff)
+                    if new_puzzle.board not in iterated_board:
+                        yield (MoveSeries((i,i+diff),last_moves),new_puzzle)
+
+    def get(self,pos):
+        return self.board[pos] if pos < self.board_len and pos >= 0 else DiskPuzzle.NA
 
     def solve(self):
         if self.solved():
             return []
         queue = deque(list(self.successors()))
+        iterated_board = []
         while len(queue) > 0:
             moves,puzzle = queue.popleft()
             if puzzle.solved():
@@ -189,7 +181,8 @@ class DiskPuzzle(object):
                     out.insert(0,moves.move)
                 return out
             else:
-                for successor in puzzle.successors(last_moves=moves):
+                iterated_board.append(puzzle.board)
+                for successor in puzzle.successors(last_moves=moves,iterated_board=iterated_board):
                     queue.append(successor)
 
 def create_disk_puzzle(length, n, distinct):
@@ -197,18 +190,17 @@ def create_disk_puzzle(length, n, distinct):
 
 def solve_identical_disks(length, n):
     puzzle = create_disk_puzzle(length,n,False)
-    print puzzle.board
     return puzzle.solve()
 
 def solve_distinct_disks(length, n):
     puzzle = create_disk_puzzle(length,n,True)
-    print puzzle.board
     return puzzle.solve()
 
 def utest():
     print solve_distinct_disks(4,2)
     print solve_distinct_disks(5,2)
-    print solve_distinct_disks(5,3)
+    print solve_distinct_disks(4,3)
+    print solve_distinct_disks(5,5)
 
 ############################################################
 # Section 4: Feedback
@@ -225,8 +217,5 @@ There are many possible solutions to eliminate them but there are only a few eff
 """
 
 feedback_question_3 = """
-All of them. Light
+All of them. Especially LightOut.
 """
-
-if __name__ == "__main__":
-    perform_test()
